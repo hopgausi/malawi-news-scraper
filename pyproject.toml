@@ -1,0 +1,29 @@
+[build-system]
+requires = ['setuptools>=61.0.0', 'wheel']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'malawi-news-scraper'
+version = '1.0.0'
+description = 'Scrape news from known news outlets in Malawi'
+readme = 'README.md'
+authors = [{ name = 'Hopson Gausi', email = 'hopgausi@gmail.com' }]
+license = { file = 'LICENSE' }
+classifiers = [
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+]
+keywords = ['News scraper', 'scraper', 'malawi']
+dependencies = [
+    'feedparser >= 6.0.10',
+    'html2text',
+    "python_version >= '3.11'",
+]
+requires-python = '>=3.11'
+
+[project.optional-dependencies]
+dev = ['black', 'bumpver', 'isort', 'pip-tools', 'pytest']
+
+[project.urls]
+Homepage = 'https://github.com/hopgausi/malawi-news-scraper'
