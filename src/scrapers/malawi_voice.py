@@ -9,11 +9,11 @@ class MalawiVoiceScraper:
     
     def scrape_news(self)-> dict:
         """ Scrape the news feed, and return a list of news articles and source details."""
-        parsed_xml_news = self.get_xml_news()
+        parsed_xml_news = self._get_xml_news()
         return self._sanitize_news(parsed_xml_news)
     
     @cache
-    def get_xml_news(self)-> dict:
+    def _get_xml_news(self)-> dict:
         """ Return an object of parsed xml news feed"""
         return feedparser.parse(self.link)
 
