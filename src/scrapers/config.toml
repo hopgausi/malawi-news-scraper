@@ -1,3 +1,4 @@
 [scraper_urls]
 malawi_voice = 'https://www.malawivoice.com/feed/'
 maravi_post = 'https://www.maravipost.com/feed/'
+mwnation = 'https://mwnation.com/feed/'
