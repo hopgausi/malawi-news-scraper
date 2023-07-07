@@ -1,10 +1,10 @@
 [build-system]
-requires = ['setuptools>=1.1.0', 'wheel']
+requires = ['setuptools>=1.1.1', 'wheel']
 build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'malawi-news-scraper'
-version = '1.1.0'
+version = '1.1.1'
 description = 'Scrape news from known news outlets in Malawi'
 readme = 'README.md'
 authors = [{ name = 'Hopson Gausi', email = 'hopgausi@gmail.com' }]
@@ -16,7 +16,7 @@ classifiers = [
 ]
 keywords = ['News scraper', 'scraper', 'malawi']
 dependencies = [
-    'feedparser >= 1.1.0',
+    'feedparser >= 1.1.1',
     'html2text',
     'beautifulsoup4'
 ]
@@ -28,7 +28,7 @@ dev = ['black', 'bumpver', 'isort', 'pip-tools', 'pytest']
 [project.urls]
 Homepage = 'https://github.com/hopgausi/malawi-news-scraper'
 [tool.bumpver]
-current_version = "1.1.0"
+current_version = "1.1.1"
 version_pattern = 'MAJOR.MINOR.PATCH'
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
