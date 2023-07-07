@@ -36,7 +36,5 @@ tag = true
 push = false
 
 [tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-]
+"pyproject.toml" = ['current_version = "{version}"', "{version}"]
 "src/scrapers/__init__.py" = ["{version}"]
