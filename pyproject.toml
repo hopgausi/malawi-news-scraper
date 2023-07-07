@@ -40,8 +40,3 @@ push = true
     'current_version = "{version}"',
 ]
 "src/scrapers/__init__.py" = ["{version}"]
-"README.md" = [
-    "{version}",
-    "{pep440_version}",
-]
-
