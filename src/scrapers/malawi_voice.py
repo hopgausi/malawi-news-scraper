@@ -1,5 +1,5 @@
 import scrapers
-from base_parser import BaseParser
+from scrapers.base_parser import BaseParser
 
 class MalawiVoiceParser(BaseParser):
     def get_link(self):
