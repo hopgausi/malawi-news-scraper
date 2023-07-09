@@ -28,7 +28,8 @@ class BaseFeedScraper:
             link = news['link']
             author = news['author']
             published_date = news['published']
-            cover_image = self._get_image_url(news['content'][0]['value'])
+            content = news['content'][0]['value'] if len(news.get('content', [])) > 0 else ''
+            cover_image = self._get_image_url(content)
             sanitized_news.append({
                 'title': title,
                 'link': link,
