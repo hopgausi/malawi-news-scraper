@@ -50,9 +50,25 @@ class BaseFeedScraper:
     
     def _get_source_details(self, feed: dict) -> dict:
         """Returns the source details for the news, that is, the site the feed is being scraped from"""
+        name = feed['title']
+        link = feed['link']
+        if len(name) == 0:
+            name = self._get_source_name(link)
         source_details = {
-            'name': feed['title'],
-            'url': feed['link'],
-            'mission_statement': feed['subtitle'],
+            'name': name,
+            'url': link,
+            'mission_statement': feed['subtitle'] if len(feed['subtitle']) > 0 else self._get_mission_statement(name),
         }
         return source_details
+
+    def _get_source_name(self, link):
+        name = ''
+        if 'investigativeplatform-mw' in link:
+            name = 'Platform For Investigative Journalism'
+        return name
+    
+    def _get_mission_statement(self, source_name):
+        statement = ''
+        if source_name == 'Platform For Investigative Journalism':
+            statement = 'Digging Truth. Lighting Democracy'
+        return statement
