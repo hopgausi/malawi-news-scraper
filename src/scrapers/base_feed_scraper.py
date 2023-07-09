@@ -62,12 +62,14 @@ class BaseFeedScraper:
         return source_details
 
     def _get_source_name(self, link):
+        """Returns source name of the news based on link provided should the feed have no defined source name"""
         name = ''
         if 'investigativeplatform-mw' in link:
             name = 'Platform For Investigative Journalism'
         return name
     
     def _get_mission_statement(self, source_name):
+        """Returns source mission statement of the news based on source name provided should the feed have no defined source statement"""
         statement = ''
         if source_name == 'Platform For Investigative Journalism':
             statement = 'Digging Truth. Lighting Democracy'
