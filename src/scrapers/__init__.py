@@ -7,7 +7,7 @@ from .pij import PijParser
 from .malawi24 import Malawi24Parser
 
 # Version of the malawi news scraper
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 _cfg = tomllib.loads(resources.read_text("scrapers", "config.toml"))
 MALAWI_VOICE_URL = _cfg["scraper_urls"]["malawi_voice"]
