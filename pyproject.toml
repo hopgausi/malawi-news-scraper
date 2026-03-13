@@ -23,7 +23,17 @@ dependencies = [
 requires-python = '>=3.11'
 
 [project.optional-dependencies]
-dev = ['black', 'bumpver', 'isort', 'pip-tools', 'pytest']
+dev = ['black', 'bumpver', 'isort', 'pip-tools', 'pytest', 'pytest-cov']
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --strict-markers --cov=scrapers --cov-report=term-missing"
 
 [project.urls]
 Homepage = 'https://github.com/hopgausi/malawi-news-scraper'
