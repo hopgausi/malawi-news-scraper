@@ -185,6 +185,72 @@ def collect_all_articles():
         print("\n⚠️  No articles collected from any source.")
 
 
+def scrape_with_summaries():
+    """Example: Scraping articles with automatic summarization"""
+    print("\n\n" + "=" * 60)
+    print("Example 4: Article Summarization (2 types)")
+    print("=" * 60)
+    print("\nThis example fetches full article content and generates:")
+    print("  1. Short teaser (~150 chars) for introducing the article")
+    print("  2. Full overview (3-4 sentences) for complete picture")
+    print("\nNote: Requires 'summarizer' dependencies. Install with:")
+    print("  pip install -e '.[summarizer]'")
+    print("-" * 60)
+
+    # Use PIJ as example (HTML scraping, reliable links)
+    print("\n→ Scraping PIJ articles with summaries...")
+
+    try:
+        parser = PijParser()
+        news_data = parser.scrape_news()
+
+        print(f"✓ Found {len(news_data['data'])} articles")
+        print("→ Generating summaries (this may take a moment)...\n")
+
+        # Add summaries to first 3 articles (to keep it fast)
+        news_data = parser.add_summaries(news_data, max_articles=3)
+
+        # Check if summarization worked
+        if "summary_error" in news_data:
+            print(f"⚠️  {news_data['summary_error']}")
+            return
+
+        # Display summary stats
+        stats = news_data.get("summary_stats", {})
+        print(f"✓ Successfully summarized: {stats.get('summarized', 0)}")
+        print(f"✗ Failed: {stats.get('failed', 0)}")
+
+        # Display articles with summaries
+        print("\n" + "=" * 60)
+        for i, article in enumerate(news_data["data"][:3], 1):
+            print(f"\n📰 Article {i}: {article['title'][:50]}...")
+            print(f"   Author: {article['author']}")
+            print(f"   Date: {article['published_date']}")
+            print(f"   URL: {article['link'][:60]}...")
+
+            # Show short teaser
+            if article.get("summary_short"):
+                print(f"\n   💡 SHORT TEASER:")
+                print(f"   {'-' * 55}")
+                print(f"   {article['summary_short']}")
+                print(f"   {'-' * 55}")
+
+            # Show full overview
+            if article.get("summary_long"):
+                print(f"\n   📝 FULL OVERVIEW:")
+                print(f"   {'-' * 55}")
+                print(f"   {article['summary_long']}")
+                print(f"   {'-' * 55}")
+
+            if article.get("summary_error"):
+                print(f"\n   ⚠️  Summary not available: {article['summary_error']}")
+
+    except TimeoutError:
+        print(f"⏱  Request timed out after 10 seconds")
+    except Exception as e:
+        print(f"❌ Failed to scrape: {str(e)}")
+
+
 def main():
     """Run all examples"""
     print("\n🗞️  Malawi News Scraper - Examples\n")
@@ -197,6 +263,9 @@ def main():
 
     # Example 3: Collect all articles
     collect_all_articles()
+
+    # Example 4: Article summarization
+    scrape_with_summaries()
 
     print("\n" + "=" * 60)
     print("✅ Examples completed!")

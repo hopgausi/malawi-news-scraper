@@ -171,6 +171,49 @@ parser.timeout = 20
 result = parser.scrape_news()
 ```
 
+### Article Summarization (New! 📝)
+
+Generate 2-3 paragraph summaries by fetching full article content:
+
+```python
+from scrapers import PijParser
+
+# Scrape articles
+parser = PijParser()
+result = parser.scrape_news()
+
+# Add summaries (fetches and summarizes full article content)
+result = parser.add_summaries(result, max_articles=3)
+
+# Display summaries
+for article in result['data'][:3]:
+    print(f"Title: {article['title']}")
+
+    if article.get('summary'):
+        print(f"\nSummary:\n{article['summary']}\n")
+    elif article.get('summary_error'):
+        print(f"Could not generate summary: {article['summary_error']}\n")
+```
+
+**Installation for Summarization:**
+
+```bash
+# Install with summarization support
+pip install -e '.[summarizer]'
+
+# Or install manually
+pip install sumy nltk
+```
+
+**Summarization Features:**
+
+- Fetches full article content from URLs
+- Generates 2-3 paragraph extractive summaries
+- Uses LSA (Latent Semantic Analysis) algorithm
+- Falls back to simple extraction if sumy is unavailable
+- Configurable number of articles to summarize
+- Includes error handling for failed fetches
+
 ## Error Handling
 
 The scraper handles common issues automatically:

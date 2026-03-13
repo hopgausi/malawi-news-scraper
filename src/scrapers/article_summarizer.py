@@ -1,7 +1,9 @@
 """
 Article Summarizer Module
 
-Fetches full article content from URLs and generates 2-3 paragraph summaries.
+Fetches full article content from URLs and generates two types of summaries:
+1. Short teaser (~150 chars) for introducing the article
+2. Longer overview (3-4 sentences) for getting the full picture
 """
 
 import urllib.request
@@ -97,18 +99,66 @@ class ArticleSummarizer:
 
             # Extract text from paragraphs
             paragraphs = article_content.find_all("p")
-            text = "\n\n".join([p.get_text().strip() for p in paragraphs if p.get_text().strip()])
+            text = "\n\n".join(
+                [p.get_text().strip() for p in paragraphs if p.get_text().strip()]
+            )
 
             # Clean up extra whitespace
             text = re.sub(r"\s+", " ", text)
             text = re.sub(r"\n\s*\n", "\n\n", text)
+
+            # Extract author if present (common byline patterns)
+            # Handles single or multiple authors with various separators:
+            # - BY AUTHOR NAME
+            # - BY AUTHOR1 AND AUTHOR2
+            # - BY AUTHOR1 & AUTHOR2
+            # - BY AUTHOR1, AUTHOR2 AND AUTHOR3
+            # - BY AUTHOR1, AUTHOR2, AND AUTHOR3 (Oxford comma)
+            author = None
+
+            # Try all-caps pattern first (most common in news):
+            # BY [CAPS NAME] (comma/AND/&) [CAPS NAME] ...
+            # Matches everything from BY until we hit a sentence start (capital followed by lowercase)
+            author_match = re.search(
+                r"BY\s+((?:[A-Z\u00c0-\u017f\'\u2019\-]+\s+(?:,\s*|AND\s+|&\s+)?)+[A-Z\u00c0-\u017f\'\u2019\-]+)(?=\s+[A-Z][a-z]|\s+The|\s*$)",
+                text,
+            )
+
+            if not author_match:
+                # Try mixed-case pattern: BY [Name Name] (comma/and/&) [Name Name]
+                author_match = re.search(
+                    r"BY\s+((?:[A-Z][a-z\u00c0-\u017f\'\u2019\-]+\s+(?:,\s*|and\s+|&\s+)?)+[A-Z][a-zA-Z\u00c0-\u017f\'\u2019\-]+)(?=\s+[a-z]|\s+[A-Z][a-z]|\s*$)",
+                    text,
+                    re.IGNORECASE,
+                )
+
+            if author_match:
+                author = author_match.group(1).strip()
+                # Clean up extra spaces around separators
+                author = re.sub(r"\s+", " ", author)
+                author = re.sub(r"\s*,\s*", ", ", author)  # Normalize comma spacing
+
+            # Clean bylines from text before summarization
+            # Remove entire byline including multiple authors with comma/AND/&
+            text = re.sub(
+                r"BY\s+(?:[A-Z\u00c0-\u017f\'\u2019\-]+\s+(?:,\s*|AND\s+|&\s+)?)+[A-Z\u00c0-\u017f\'\u2019\-]+\s*",
+                "",
+                text,
+            )
+            text = re.sub(
+                r"BY\s+(?:[A-Z][a-z\u00c0-\u017f\'\u2019\-]+\s+(?:,\s*|and\s+|&\s+)?)+[A-Z][a-zA-Z\u00c0-\u017f\'\u2019\-]+\s*",
+                "",
+                text,
+                flags=re.IGNORECASE,
+            )
+            text = re.sub(r"\s+", " ", text).strip()
 
             socket.setdefaulttimeout(old_timeout)
 
             if not text or len(text) < 50:
                 return {"content": None, "error": "Article text too short or empty"}
 
-            return {"content": text, "error": None}
+            return {"content": text, "author": author, "error": None}
 
         except socket.timeout:
             return {"content": None, "error": "Timeout fetching article"}
@@ -119,16 +169,19 @@ class ArticleSummarizer:
         finally:
             socket.setdefaulttimeout(old_timeout)
 
-    def summarize_text(self, text: str, num_sentences: int = 5) -> str:
+    def summarize_text(
+        self, text: str, num_sentences: int = 2, short: bool = False
+    ) -> str:
         """
-        Summarize text into specified number of sentences.
+        Summarize text into a single catchy paragraph.
 
         Args:
             text: The full article text
-            num_sentences: Number of sentences in summary (default 5 for ~2-3 paragraphs)
+            num_sentences: Number of sentences in summary
+            short: If True, generate a very short teaser (under 150 chars)
 
         Returns:
-            Summary text or original text if summarization fails
+            Summary text as a single engaging paragraph
         """
         if not text:
             return ""
@@ -141,73 +194,130 @@ class ArticleSummarizer:
                 summarizer = LsaSummarizer(stemmer)
                 summarizer.stop_words = get_stop_words("english")
 
-                summary_sentences = summarizer(parser.document, num_sentences)
-                summary = " ".join([str(sentence) for sentence in summary_sentences])
+                # Generate based on type requested
+                if short:
+                    # Very short teaser - just key phrase or half sentence
+                    summary_sentences = summarizer(parser.document, 1)
+                    sentences_list = [
+                        str(sentence).strip() for sentence in summary_sentences
+                    ]
+                    summary = sentences_list[0] if sentences_list else ""
 
-                # Format into paragraphs (2-3 sentences per paragraph)
-                sentences = summary.split(". ")
-                paragraphs = []
-                current_para = []
+                    # Trim to under 150 chars at natural break
+                    if len(summary) > 150:
+                        for break_char in [",", ";", "—", " - ", " and ", " but "]:
+                            truncate_at = summary[:147].rfind(break_char)
+                            if truncate_at > 50:
+                                summary = summary[:truncate_at] + "..."
+                                break
+                        else:
+                            truncate_at = summary[:147].rfind(" ")
+                            summary = (
+                                summary[:truncate_at] + "..."
+                                if truncate_at > 50
+                                else summary[:147] + "..."
+                            )
+                else:
+                    # Longer overview - 3-4 sentences
+                    summary_sentences = summarizer(parser.document, 4)
+                    sentences_list = [
+                        str(sentence).strip() for sentence in summary_sentences
+                    ]
+                    summary = " ".join(sentences_list)
 
-                for i, sent in enumerate(sentences):
-                    current_para.append(sent if sent.endswith(".") else sent + ".")
-                    # Create paragraph every 2-3 sentences
-                    if len(current_para) >= 2 and (i == len(sentences) - 1 or len(current_para) >= 3):
-                        paragraphs.append(" ".join(current_para))
-                        current_para = []
+                # Ensure proper sentence endings
+                summary = re.sub(r"\s+", " ", summary).strip()
+                if not summary.endswith((".", "!", "?", "...")):
+                    summary += "."
 
-                # Add remaining sentences
-                if current_para:
-                    paragraphs.append(" ".join(current_para))
-
-                return "\n\n".join(paragraphs)
+                return summary
 
             except Exception as e:
                 # Fall back to simple extraction
                 pass
 
-        # Simple fallback: extract first few sentences
+        # Simple fallback: extract sentences
         sentences = re.split(r"(?<=[.!?])\s+", text)
-        summary_sentences = sentences[: min(num_sentences, len(sentences))]
-        summary = " ".join(summary_sentences)
 
-        # Format into 2-3 paragraphs
-        words = summary.split()
-        third = len(words) // 3
-        if third > 0 and len(words) > 20:
-            para1 = " ".join(words[:third])
-            para2 = " ".join(words[third : third * 2])
-            para3 = " ".join(words[third * 2 :])
-            return f"{para1}\n\n{para2}\n\n{para3}"
-        elif len(words) > 10:
-            # Split into 2 paragraphs
-            half = len(words) // 2
-            para1 = " ".join(words[:half])
-            para2 = " ".join(words[half:])
-            return f"{para1}\n\n{para2}"
+        # Clean and filter sentences (remove very short ones)
+        sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+
+        if not sentences:
+            return text[:200] + "..." if len(text) > 200 else text
+
+        if short:
+            # Very short teaser - first sentence trimmed to under 150 chars
+            summary = sentences[0]
+
+            if len(summary) > 150:
+                # Try to find a natural break
+                for break_char in [",", ";", "—", " - ", " and ", " but "]:
+                    truncate_at = summary[:147].rfind(break_char)
+                    if truncate_at > 50:
+                        summary = summary[:truncate_at] + "..."
+                        break
+                else:
+                    truncate_at = summary[:147].rfind(" ")
+                    summary = (
+                        summary[:truncate_at] + "..."
+                        if truncate_at > 50
+                        else summary[:147] + "..."
+                    )
         else:
-            return summary
+            # Longer overview - first 3-4 sentences
+            num_to_use = min(4, len(sentences))
+            summary = " ".join(sentences[:num_to_use])
 
-    def get_article_summary(self, url: str, num_sentences: int = 5) -> dict:
+        # Clean up and ensure proper ending
+        summary = re.sub(r"\s+", " ", summary).strip()
+        if not summary.endswith((".", "!", "?", "...")):
+            summary += "."
+
+        return summary
+
+    def get_article_summary(self, url: str) -> dict:
         """
-        Fetch article and generate summary.
+        Fetch article and generate both short teaser and longer overview summaries.
 
         Args:
             url: Article URL
-            num_sentences: Number of sentences in summary
 
         Returns:
-            dict with 'summary', 'error', and 'full_content'
+            dict with 'summary_short' (teaser), 'summary_long' (overview),
+            'author' (extracted from content if present), 'error', and 'full_content'
         """
         # Fetch content
         result = self.fetch_article_content(url)
 
         if result["error"]:
-            return {"summary": None, "error": result["error"], "full_content": None}
+            return {
+                "summary_short": None,
+                "summary_long": None,
+                "author": None,
+                "error": result["error"],
+                "full_content": None,
+            }
 
         content = result["content"]
+        author = result.get("author")
 
-        # Generate summary
-        summary = self.summarize_text(content, num_sentences)
+        # Generate both types of summaries
+        try:
+            summary_short = self.summarize_text(content, num_sentences=1, short=True)
+            summary_long = self.summarize_text(content, num_sentences=4, short=False)
+        except Exception as e:
+            return {
+                "summary_short": None,
+                "summary_long": None,
+                "author": author,
+                "error": f"Summarization failed: {str(e)[:50]}",
+                "full_content": content,
+            }
 
-        return {"summary": summary, "error": None, "full_content": content}
+        return {
+            "summary_short": summary_short,
+            "summary_long": summary_long,
+            "author": author,
+            "error": None,
+            "full_content": content,
+        }

@@ -5,6 +5,14 @@ import socket
 import urllib.request
 import urllib.error
 
+# Try to import summarizer (optional)
+try:
+    from scrapers.article_summarizer import ArticleSummarizer
+
+    SUMMARIZER_AVAILABLE = True
+except ImportError:
+    SUMMARIZER_AVAILABLE = False
+
 
 class BaseFeedScraper:
     def __init__(self):
@@ -145,3 +153,78 @@ class BaseFeedScraper:
         if source_name == "Platform For Investigative Journalism":
             statement = "Digging Truth. Lighting Democracy"
         return statement
+
+    def add_summaries(self, news_data: dict, max_articles: int = None) -> dict:
+        """
+        Add article summaries to news data by fetching full content from URLs.
+
+        Generates two types of summaries:
+        - summary_short: Brief teaser (~150 chars) for introducing the article
+        - summary_long: Full overview (3-4 sentences) for complete picture
+
+        Args:
+            news_data: The news data dict from scrape_news()
+            max_articles: Maximum number of articles to summarize (None = all)
+
+        Returns:
+            Updated news_data dict with 'summary_short' and 'summary_long' fields
+        """
+        if not SUMMARIZER_AVAILABLE:
+            news_data["summary_error"] = (
+                "Summarizer not available. Install: pip install -e '.[summarizer]'"
+            )
+            return news_data
+
+        summarizer = ArticleSummarizer(timeout=self.timeout)
+        articles = news_data.get("data", [])
+
+        if max_articles:
+            articles = articles[:max_articles]
+
+        summarized_count = 0
+        failed_count = 0
+
+        for article in articles:
+            url = article.get("link", "")
+            if not url:
+                article["summary_short"] = None
+                article["summary_long"] = None
+                article["summary_error"] = "No URL available"
+                failed_count += 1
+                continue
+
+            # Get both summary types
+            result = summarizer.get_article_summary(url)
+
+            if result["error"]:
+                article["summary_short"] = None
+                article["summary_long"] = None
+                article["summary_error"] = result["error"]
+                failed_count += 1
+            else:
+                article["summary_short"] = result["summary_short"]
+                article["summary_long"] = result["summary_long"]
+
+                # Update author if extracted from content (override generic source name)
+                if result.get("author"):
+                    # Only update if current author is generic or missing
+                    current_author = article.get("author", "")
+                    if not current_author or current_author in [
+                        "Platform For Investigative Journalism",
+                        "Malawi Voice",
+                        "Malawi24",
+                        "MW Nation",
+                        "Maravi Post",
+                    ]:
+                        article["author"] = result["author"]
+
+                summarized_count += 1
+
+        # Add summary stats
+        news_data["summary_stats"] = {
+            "total_articles": len(news_data.get("data", [])),
+            "summarized": summarized_count,
+            "failed": failed_count,
+        }
+
+        return news_data
