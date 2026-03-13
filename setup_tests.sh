@@ -69,7 +69,7 @@ if [ $? -eq 0 ]; then
     echo "  • pytest -v tests/"
     echo "  • pytest --run-integration"
     echo ""
-    echo "See TESTING.md for detailed documentation"
+    echo "See README.md for documentation"
     echo ""
 else
     echo ""
