@@ -21,16 +21,23 @@ This library allows you to programmatically fetch news articles from 5 major Mal
 | ---------------- | --------------- | --------------------------------- |
 | **Malawi Voice** | malawivoice.com | RSS feed                          |
 | **Malawi24**     | malawi24.com    | RSS feed                          |
-| **Maravi Post**  | maravipost.com  | HTML scraping (CAPTCHA protected) |
+| **Maravi Post**  | maravipost.com  | HTML scraping (Selenium optional) |
 | **MW Nation**    | mwnation.com    | RSS feed                          |
 | **PIJ**          | pijmalawi.org   | HTML scraping                     |
 
-**Note:** Maravi Post's website uses CAPTCHA protection which may prevent scraping. When CAPTCHA is encountered, the scraper returns an empty list with a warning message.
+**Note:** Maravi Post's website uses CAPTCHA protection. The scraper can optionally use Selenium/Firefox to attempt bypassing it. Without Selenium, it returns an empty list with a warning. See [Optional Selenium Support](#optional-selenium-support) below.
 
 ## Installation
 
 ```bash
 pip install malawi-news-scraper
+```
+
+For Maravi Post CAPTCHA bypass support (optional):
+
+```bash
+pip install malawi-news-scraper[selenium]
+# Also install Firefox browser on your system
 ```
 
 Or install from source:
@@ -39,6 +46,9 @@ Or install from source:
 git clone https://github.com/hopgausi/malawi-news-scraper
 cd malawi-news-scraper
 pip install -e .
+
+# With Selenium support:
+pip install -e '.[selenium]'
 ```
 
 ## Quick Start
@@ -253,6 +263,41 @@ malawi-news-scraper/
 - beautifulsoup4
 - html2text
 
+## Optional Selenium Support
+
+Maravi Post uses CAPTCHA protection which blocks simple HTTP requests. To attempt bypassing this, you can optionally install Selenium with Chrome or Firefox:
+
+```bash
+# Install Selenium and webdriver manager
+pip install selenium webdriver-manager
+
+# Install Chrome or Chromium (recommended - tries this first)
+# Ubuntu/Debian:
+sudo apt-get install chromium-browser
+
+# Or install Firefox (fallback option)
+# Ubuntu/Debian:
+sudo apt-get install firefox
+
+# Fedora:
+sudo dnf install chromium  # or firefox
+
+# macOS:
+brew install chromium  # or firefox
+```
+
+With Selenium installed, the Maravi Post scraper will automatically:
+
+1. Try Chrome/Chromium first, fallback to Firefox if not available
+2. Launch a headless browser
+3. Load the Maravi Post website
+4. Attempt to bypass CAPTCHA
+5. Extract articles if successful
+
+**Note:** Even with Selenium, CAPTCHA may still block scraping. The scraper will return a warning message if CAPTCHA persists.
+
+**Without Selenium:** The scraper gracefully returns an empty article list with a warning message explaining that Selenium is needed.
+
 ## License
 
 See LICENSE file for details.
@@ -267,7 +312,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 **Solution**: Check your internet connection. Some sources may be temporarily down.
 
 **Issue**: Maravi Post returns no articles with CAPTCHA warning  
-**Solution**: The Maravi Post website uses CAPTCHA protection to prevent automated scraping. This is a site-level restriction and cannot be bypassed by the scraper. The scraper will detect this and return an empty list with a warning message.
+**Solution**: The Maravi Post website uses CAPTCHA protection. Try installing Selenium support: `pip install selenium webdriver-manager` and ensure Firefox is installed on your system. The scraper will then attempt to use Selenium to bypass the CAPTCHA. Note: Even with Selenium, CAPTCHA may still block access depending on the site's security settings.
 
 **Issue**: PIJ returns no articles  
 **Solution**: The PIJ website structure may have changed. The scraper uses HTML parsing which depends on the site's structure.

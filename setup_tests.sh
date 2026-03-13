@@ -30,7 +30,8 @@ fi
 
 echo ""
 echo "📦 Installing package in development mode..."
-pip install -e '.[dev]'
+echo "   Installing with dev and selenium dependencies..."
+pip install -e '.[dev,selenium]'
 
 if [ $? -eq 0 ]; then
     echo "   ✅ Installation successful"
@@ -46,7 +47,9 @@ import sys
 try:
     import scrapers
     import pytest
-    print('   ✅ All imports successful')
+    import selenium
+    from webdriver_manager.firefox import GeckoDriverManager
+    print('   ✅ All imports successful (including selenium)')
     sys.exit(0)
 except ImportError as e:
     print(f'   ❌ Import error: {e}')
@@ -58,6 +61,15 @@ if [ $? -eq 0 ]; then
     echo "================================================"
     echo "✅ Test environment setup complete!"
     echo "================================================"
+    echo ""
+    echo "📦 Installed packages:"
+    echo "  • Core dependencies (feedparser, beautifulsoup4, etc.)"
+    echo "  • Dev dependencies (pytest, coverage, etc.)"
+    echo "  • Selenium dependencies (for Maravi Post scraping)"
+    echo ""
+    echo "⚠️  Note: Chrome/Chromium or Firefox browser required for Selenium"
+    echo "   Chrome (recommended): sudo apt-get install chromium-browser"
+    echo "   Firefox (fallback): sudo apt-get install firefox"
     echo ""
     echo "Quick Start:"
     echo "  • Run unit tests:        python run_tests.py"

@@ -1,6 +1,6 @@
 [scraper_urls]
 malawi_voice = 'https://www.malawivoice.com/feed/'
-maravi_post = 'https://www.maravipost.com/feed/'
+maravi_post = 'https://www.maravipost.com/'
 mwnation = 'https://mwnation.com/feed/'
 pij = 'https://www.pijmalawi.org/feed/'
 malawi24 = 'https://malawi24.com/feed/'
