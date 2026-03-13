@@ -17,13 +17,15 @@ This library allows you to programmatically fetch news articles from 5 major Mal
 
 ## Supported News Sources
 
-| Source           | URL             | Notes         |
-| ---------------- | --------------- | ------------- |
-| **Malawi Voice** | malawivoice.com | RSS feed      |
-| **Malawi24**     | malawi24.com    | RSS feed      |
-| **Maravi Post**  | maravipost.com  | RSS feed      |
-| **MW Nation**    | mwnation.com    | RSS feed      |
-| **PIJ**          | pijmalawi.org   | HTML scraping |
+| Source           | URL             | Notes                             |
+| ---------------- | --------------- | --------------------------------- |
+| **Malawi Voice** | malawivoice.com | RSS feed                          |
+| **Malawi24**     | malawi24.com    | RSS feed                          |
+| **Maravi Post**  | maravipost.com  | HTML scraping (CAPTCHA protected) |
+| **MW Nation**    | mwnation.com    | RSS feed                          |
+| **PIJ**          | pijmalawi.org   | HTML scraping                     |
+
+**Note:** Maravi Post's website uses CAPTCHA protection which may prevent scraping. When CAPTCHA is encountered, the scraper returns an empty list with a warning message.
 
 ## Installation
 
@@ -263,6 +265,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 **Issue**: All sources timeout  
 **Solution**: Check your internet connection. Some sources may be temporarily down.
+
+**Issue**: Maravi Post returns no articles with CAPTCHA warning  
+**Solution**: The Maravi Post website uses CAPTCHA protection to prevent automated scraping. This is a site-level restriction and cannot be bypassed by the scraper. The scraper will detect this and return an empty list with a warning message.
 
 **Issue**: PIJ returns no articles  
 **Solution**: The PIJ website structure may have changed. The scraper uses HTML parsing which depends on the site's structure.
