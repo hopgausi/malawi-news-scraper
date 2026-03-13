@@ -17,13 +17,13 @@ This library allows you to programmatically fetch news articles from 5 major Mal
 
 ## Supported News Sources
 
-| Source | URL | Notes |
-|--------|-----|-------|
-| **Malawi Voice** | malawivoice.com | RSS feed |
-| **Malawi24** | malawi24.com | RSS feed |
-| **Maravi Post** | maravipost.com | RSS feed |
-| **MW Nation** | mwnation.com | RSS feed |
-| **PIJ** | pijmalawi.org | HTML scraping |
+| Source           | URL             | Notes         |
+| ---------------- | --------------- | ------------- |
+| **Malawi Voice** | malawivoice.com | RSS feed      |
+| **Malawi24**     | malawi24.com    | RSS feed      |
+| **Maravi Post**  | maravipost.com  | RSS feed      |
+| **MW Nation**    | mwnation.com    | RSS feed      |
+| **PIJ**          | pijmalawi.org   | HTML scraping |
 
 ## Installation
 
@@ -52,21 +52,21 @@ parser = MalawiVoiceParser()
 # Scrape news
 try:
     result = parser.scrape_news()
-    
+
     # Access articles
     articles = result['data']
     source_info = result['source']
-    
+
     print(f"Source: {source_info['name']}")
     print(f"Found {len(articles)} articles\n")
-    
+
     # Display first article
     article = articles[0]
     print(f"Title: {article['title']}")
     print(f"Author: {article['author']}")
     print(f"Date: {article['published_date']}")
     print(f"Link: {article['link']}")
-    
+
 except TimeoutError:
     print("Request timed out after 10 seconds")
 except Exception as e:
@@ -100,10 +100,10 @@ for name, parser in parsers.items():
     try:
         result = parser.scrape_news()
         articles = result['data']
-        
+
         print(f"✓ {name}: {len(articles)} articles")
         all_articles.extend(articles)
-        
+
     except TimeoutError:
         print(f"⏱ {name}: Timeout")
     except Exception as e:
@@ -178,13 +178,13 @@ parser = MalawiVoiceParser()
 try:
     result = parser.scrape_news()
     # Process articles...
-    
+
 except TimeoutError:
     print("The request took too long (>10 seconds)")
-    
+
 except ConnectionError:
     print("Could not connect to the news source")
-    
+
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
 ```
@@ -198,6 +198,7 @@ python examples.py
 ```
 
 This will let you:
+
 1. Choose a specific news source to scrape
 2. See all sources scraped at once
 3. View the most recent articles across all sources
