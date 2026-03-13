@@ -195,10 +195,10 @@ for name, parser in parsers:
 
 ## Testing Timeout Behavior
 
-Run the demo script to see timeout handling in action:
+Run the examples script to see timeout handling in action:
 
 ```bash
-python demo_timeout.py
+python examples.py
 ```
 
 This demonstrates:
@@ -249,38 +249,21 @@ for name, parser in parsers:
 
 ## Verifying Timeout Behavior
 
-### Quick Verification Test
+### Testing with Examples
 
-Run the timeout verification script to test a specific slow source:
-
-```bash
-python test_timeout_verify.py
-```
-
-This tests Maravi Post (which was previously taking 71 seconds before timing out) and verifies it now times out at ~10 seconds.
-
-**Expected Output:**
-
-```
-✓ Timeout working correctly: 10.7s ≤ 12s
-  (10s timeout + ~0.7s overhead)
-```
-
-### Full Demo
-
-Run the complete demo to see timeout handling across all sources:
+Run the examples script to test timeout behavior across all sources:
 
 ```bash
-python demo_timeout.py
+python examples.py
 ```
 
-This shows:
+The script tests all parsers and shows:
 
-- ✓ Successful scrapes with timing
+- ✓ Successful scrapes with article counts
 - ⏱ Timeouts (sources that took >10s)
 - ✗ Failed sources (connection errors, etc.)
 
-### Expected Behavior
+**Expected Behavior:**
 
 When a source times out:
 
@@ -301,7 +284,7 @@ A: At the **socket level** using `socket.setdefaulttimeout()`. This interrupts n
 A: Not recommended, but you can set a very high value: `parser.timeout = 9999`
 
 **Q: What if all sources timeout?**  
-A: Check your internet connection or the news sites may be experiencing issues. Run `python test_timeout_verify.py` to diagnose specific sources.
+A: Check your internet connection or the news sites may be experiencing issues. Run `python examples.py` to test all sources.
 
 **Q: Does timeout affect cached results?**  
 A: No, cached results (from `@cache` decorator) return immediately without network calls.
@@ -311,6 +294,5 @@ A: The 10s is the network socket timeout. The extra ~0.7s is Python overhead (fu
 
 ## Related
 
-- See [examples.py](examples.py) for basic usage
-- See [demo_timeout.py](demo_timeout.py) for timeout demo
+- See [examples.py](examples.py) for usage examples and timeout demo
 - See [TESTING.md](TESTING.md) for testing documentation

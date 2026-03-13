@@ -32,11 +32,13 @@ The `PijParser` class now:
 ### Results
 
 Before:
+
 - ❌ 309 articles
 - ❌ All articles had the same link
 - ❌ Links returned 404 errors
 
 After:
+
 - ✅ 12 unique articles
 - ✅ All links are unique (100% unique)
 - ✅ All links work and point to real articles
@@ -55,32 +57,29 @@ class PijParser(BaseParser):
     def get_link(self):
         """Still returns RSS URL for backwards compatibility"""
         return scrapers.PIJ_URL
-    
+
     def scrape_news(self) -> dict:
         """Custom HTML scraper for PIJ"""
         # 1. Fetch HTML from all-stories page
         # 2. Parse with BeautifulSoup
         # 3. Extract articles
         # 4. Return standardized format
-        
+
     def _parse_pij_html(self, soup, base_url) -> list:
         """Find article containers and extract data"""
-        
+
     def _extract_article_data(self, element, base_url) -> dict:
         """Extract title, link, image, date from article element"""
 ```
 
 ### Testing
 
-Run the PIJ HTML scraper test:
-```bash
-python test_pij_html.py
-```
+Test PIJ scraping using the examples script:
 
-Run all examples including PIJ:
 ```bash
 python examples.py
-# Select option 5 (PIJ)
+# Select option 5 (PIJ) to test PIJ specifically
+# Or wait for Example 2/3 which scrape all sources including PIJ
 ```
 
 ### Future Maintenance
@@ -91,12 +90,11 @@ If the PIJ website structure changes, you may need to update:
 2. **Selectors**: Update `find_all('article', class_='story-card')` if the HTML class names change
 3. **Field extraction**: Update `_extract_article_data()` if the article structure changes
 
-To diagnose structure changes, run:
-```bash
-python inspect_pij_html.py
-```
+To diagnose structure changes, you can:
 
-This will help you identify the new HTML structure and update selectors accordingly.
+- Manually inspect the page source at https://www.pijmalawi.org/all-stories
+- Use browser developer tools to inspect article elements
+- Test with `python examples.py` and select PIJ to see if articles are still being extracted correctly
 
 ### Dependencies
 
